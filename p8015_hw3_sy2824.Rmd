@@ -8,9 +8,10 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(
-  fig.width = 6,
-  fig.asp = .6,
-  out.width = "90%"
+  fig.width = 9,
+  fig.height = 9,
+  fig.asp = .9,
+  out.width = "100%"
 )
 library(tidyverse)
 library(p8105.datasets)
@@ -111,7 +112,7 @@ There are `r distinct(cart_data, aisle_id) %>% count()` aisles. The most items o
 cart_data %>% 
   group_by(aisle) %>% 
   summarize(number = n()) %>% 
-  arrange(desc(number)) %>% 
+  mutate(aisle = fct_reorder(aisle, desc(number))) %>% 
   ggplot(aes(x = aisle, y = number)) +
   geom_point() +
   labs(
@@ -119,7 +120,11 @@ cart_data %>%
       x = "Items",
       y = "Number of items"
     ) +
-  theme(legend.position = "bottom",axis.text.x = element_text(angle = 270, hjust = 0))
+  scale_y_log10(breaks = c(200000,20000, 2000, 200), 
+                     labels = c("200000","20000", "2000", "200"),
+                     limits = c(200, 200000)) +
+  theme(legend.position = "bottom",
+      axis.text.x = element_text(angle = 90, hjust = 1, size = rel(1)))
 ```
 
 **Make a table showing the most popular item aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”.**
@@ -204,7 +209,7 @@ temperature_plot =
 tidy_ny_noaa %>% 
   filter(tmax != "NA", tmin != "NA") %>% 
   ggplot(aes(x = tmin, y = tmax)) +
-  geom_density2d() +
+  geom_hex() +
   labs(
     x = "Minimum temperature (ºC)",
     y = "Maximum temperature (ºC)",
