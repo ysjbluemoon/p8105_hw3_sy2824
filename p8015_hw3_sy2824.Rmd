@@ -8,7 +8,7 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(
-  fig.width = 9,
+  fig.width = 15,
   fig.height = 9,
   fig.asp = .9,
   out.width = "100%"
@@ -22,6 +22,10 @@ library(patchwork)
 
 # Question 1
 ## Cleaning data
+* Format the data to use appropriate variable names `clean_names()`
+* Filter with “Overall Health” topic
+* Include only responses from “Excellent” to “Poor”
+* Organize responses as a factor taking levels ordered from “Excellent” to “Poor”
 
 ```{r}
 tidy_brfss = brfss_smart2010 %>% 
@@ -44,16 +48,17 @@ In 2002, the states that were observed at 7 locations are `CT`, `FL` and `NC`.
 
 **Make a “spaghetti plot” that shows the number of observations in each state from 2002 to 2010.**
 ```{r}
-  group_by(tidy_brfss,locationabbr,year) %>% 
-  summarize(n_location = n_distinct(locationdesc)) %>% 
-  ggplot(aes(y = n_location, x = year)) +
+ observation_in_state = group_by(tidy_brfss,locationabbr,year) %>% 
+  summarize(n_location = n_distinct(locationdesc)) 
+
+  ggplot(observation_in_state, aes(y = n_location, x = year)) +
   geom_line(aes(color = locationabbr), alpha = .5) +
   labs(
     title = "Spaghetti plot",
     x = "Year",
     y = "Number of observations in each state"
-  ) 
-  
+  )
+
 ```
 
 **Make a table showing, for the years 2002, 2006, and 2010, the mean and standard deviation of the proportion of “Excellent” responses across locations in NY State.**
@@ -209,7 +214,7 @@ temperature_plot =
 tidy_ny_noaa %>% 
   filter(tmax != "NA", tmin != "NA") %>% 
   ggplot(aes(x = tmin, y = tmax)) +
-  geom_hex() +
+  geom_density2d() +
   labs(
     x = "Minimum temperature (ºC)",
     y = "Maximum temperature (ºC)",
