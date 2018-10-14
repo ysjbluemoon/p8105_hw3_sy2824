@@ -14,6 +14,8 @@ knitr::opts_chunk$set(
 )
 library(tidyverse)
 library(p8105.datasets)
+library(rnoaa)
+library(patchwork)
 
 ```
 
@@ -149,4 +151,78 @@ filter(product_name %in% c("Pink Lady Apples","Coffee Ice Cream")) %>%
   summarize(mean_hour = mean(order_hour_of_day)) %>% 
   spread(key = order_dow, value = mean_hour)
 ```
+
+# Question 3
+```{r}
+ny_noaa 
+```
+
+**Do some data cleaning. Create separate variables for year, month, and day. Ensure observations for temperature, precipitation, and snowfall are given in reasonable units. For snowfall, what are the most commonly observed values? Why?**
+```{r}
+tidy_ny_noaa = ny_noaa %>% 
+  separate( date, into = c("year", "month", "day"), sep = "-") %>% 
+  mutate(
+    year = as.integer(year),
+    month = as.integer(month),
+    month = month.name[month],
+    day = as.integer(day),
+    prcp = prcp/10,
+    snow = as.integer(snow),
+    snwd = as.integer(snwd),
+    tmax = as.numeric(tmax)/10,
+    tmin = as.numeric(tmin)/10
+    )
+
+filter(tidy_ny_noaa, snow != "NA") %>% 
+  group_by(snow) %>% 
+  summarize(number = n()) %>% 
+  arrange(desc(number)) %>% 
+  head(4)
+```
+So, `0` is the most commonly ovserved value. Because in most days of a year, New York would not snow.
+
+**Make a two-panel plot showing the average MAX temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?**
+```{r}
+filtered_ny_noaa = filter(tidy_ny_noaa, month %in% c("January" , "July")) %>% 
+group_by(month, year, id) %>% 
+  summarize(mean_tmax = mean(tmax, na.rm = TRUE)) %>% 
+  filter(mean_tmax != "NaN") 
+  
+ggplot(filtered_ny_noaa, aes(x = year, y = mean_tmax, group = year)) +
+  geom_boxplot() +
+  facet_grid(~month) +
+  labs(
+    x = "Year",
+    y = "Average maximum temperature",
+    title = "Average maximum temperature across years in January and July"
+  )
+```
+
+**Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option); and (ii) make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.**
+```{r}
+temperature_plot = 
+tidy_ny_noaa %>% 
+  filter(tmax != "NA", tmin != "NA") %>% 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_density2d() +
+  labs(
+    x = "Minimum temperature (ºC)",
+    y = "Maximum temperature (ºC)",
+    title = "Maximum vs Minimum Temperature"
+  )
+
+snowfall_plot = 
+  tidy_ny_noaa %>% 
+  filter(snow > 0 , snow < 100) %>% 
+  ggplot(aes(x = year, y = snow)) +
+  geom_boxplot(aes(group = year))+
+  labs(
+    x = "Year",
+    y = "Snowfall (mm)",
+    title = "Distribution of snowfall values over years"
+  )
+
+temperature_plot + snowfall_plot
+```
+
 
