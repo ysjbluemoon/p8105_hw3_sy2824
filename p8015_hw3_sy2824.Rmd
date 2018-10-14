@@ -97,15 +97,19 @@ In year 2002, it has the biggest mean proportion and the largest standard deviat
   theme(legend.position = "bottom")
   
 ```
-From the plot, there's a tendency to show that the mean value of each response stays almost the same over year. Also, the response of `Very good` `Good` weigh the most in mean value of proportion. `Poor` and `Fair` share the least proportion in mean value of proportion. 
+From the plot, there's a tendency to show that the mean value of each response stays almost the same over year. Also, the response of `Very good` and `Good` weigh the most in mean value of proportion. `Poor` and `Fair` share the least proportion in mean value of proportion. 
 
 # Question 2
-## Cleaning data
 
+## Description of dataset
 ```{r}
 cart_data = instacart
 ```
-There are `r nrow(cart_data)` rows and `r ncol(cart_data)` coloums.
+This is a dataset that stores the information of orders and the relaventing information of a the odered products. There are `r nrow(cart_data)` rows and `r ncol(cart_data)` coloums.The dataset has two knids of information: order information and product information. For order information, it contains about the order id, order number, customer id,etc. For product information, it contains information about product name, product id, department, etc. 
+
+Also, each order id could coutain more than one product id, so the key varibale of this dataset should be `product id` and its relevant information including `product name`, `aisle id`, `department id`, `department name`, `aisele name`.
+
+To give an example of an observation, take `oder id` 1 to illustrate. In total, there are 8 items in order id 1, and the product names are Bulgarian Yogurt and the other 7 items. For Bulgarian Yogurt, it has an unique product id and belongs to a aisle and a department. For each aisle and department, it also has the unique id separately.
 
 **How many aisles are there, and which aisles are the most items ordered from?**
 ```{r}
@@ -138,6 +142,7 @@ cart_data %>%
   theme(legend.position = "bottom",
       axis.text.x = element_text(angle = 90, hjust = 1, size = rel(1)))
 ```
+The plot shows the number of items ordered in each aisle in descending order to be readable for human. Also, the `scale_y_log10` is used to scale the y axis in order to distinguish the very small difference in a large range of data.
 
 **Make a table showing the most popular item aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”.**
 ```{r}
